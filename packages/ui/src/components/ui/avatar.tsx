@@ -11,13 +11,14 @@ const AvatarPrimitiveFallback = AvatarPrimitive.Fallback;
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitiveRoot>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitiveRoot>
->(({ className, ...props }, ref) => (
+>(({ className, alt = "Avatar", ...props }, ref) => (
   <AvatarPrimitiveRoot
     ref={ref}
     className={cn(
       'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full',
       className,
     )}
+    alt={alt}
     {...props}
   />
 ));
@@ -49,5 +50,9 @@ const AvatarFallback = React.forwardRef<
   />
 ));
 AvatarFallback.displayName = AvatarPrimitiveFallback.displayName;
+
+// Add sub-components to Avatar
+Avatar.Image = AvatarImage;
+Avatar.Fallback = AvatarFallback;
 
 export { Avatar, AvatarFallback, AvatarImage };

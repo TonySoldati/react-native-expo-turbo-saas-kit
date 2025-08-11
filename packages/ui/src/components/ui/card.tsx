@@ -1,24 +1,40 @@
 import * as React from 'react';
 
 import { TextRef, ViewRef } from '@rn-primitives/types';
-import { Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 
 import { cn } from '../../lib/utils';
 import { TextClassContext } from './text';
 
 const Card = React.forwardRef<
   ViewRef,
-  React.ComponentPropsWithoutRef<typeof View>
->(({ className, ...props }, ref) => (
-  <View
-    ref={ref}
-    className={cn(
-      'border-border bg-card shadow-foreground rounded-lg border',
-      className,
-    )}
-    {...props}
-  />
-));
+  React.ComponentPropsWithoutRef<typeof View> & { onPress?: () => void }
+>(({ className, onPress, ...props }, ref) => {
+  if (onPress) {
+    return (
+      <Pressable
+        ref={ref}
+        onPress={onPress}
+        className={cn(
+          'border-border bg-card shadow-foreground rounded-lg border',
+          className,
+        )}
+        {...props}
+      />
+    );
+  }
+  
+  return (
+    <View
+      ref={ref}
+      className={cn(
+        'border-border bg-card shadow-foreground rounded-lg border',
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 Card.displayName = 'Card';
 
 const CardHeader = React.forwardRef<

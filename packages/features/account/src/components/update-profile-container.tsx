@@ -50,7 +50,8 @@ function UpdateProfilePictureContainer(props: { data: Tables<'accounts'> }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Update your profile picture</CardTitle>
+        <CardTitle>Bonjour c'est moi Antoine qui teste
+        </CardTitle>
 
         <CardDescription>
           Update your profile picture to make it easier for others to find you.

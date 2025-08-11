@@ -1,0 +1,31 @@
+{
+  "name": "@kit/feed",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "catalog:",
+    "@kit/supabase": "workspace:*",
+    "@kit/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "date-fns": "catalog:",
+    "lucide-react-native": "catalog:",
+    "react": "catalog:",
+    "react-hook-form": "catalog:",
+    "react-native": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@kit/eslint-config": "workspace:*",
+    "@kit/typescript-config": "workspace:*",
+    "@types/react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@kit/prettier-config"
+}

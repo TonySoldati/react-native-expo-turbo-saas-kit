@@ -1,7 +1,7 @@
 {
   "name": "app",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "main": "./App.js",
   "scripts": {
     "clean": "git clean -xdf .next .turbo node_modules",
     "format": "prettier --check \"**/*.{js,cjs,mjs,ts,tsx,md,json}\"",
@@ -34,6 +34,7 @@
     "@expo/vector-icons": "catalog:",
     "@kit/account": "workspace:*",
     "@kit/auth": "workspace:*",
+    "@kit/feed": "workspace:*",
     "@kit/supabase": "workspace:^",
     "@kit/ui": "workspace:*",
     "@react-native-async-storage/async-storage": "catalog:",

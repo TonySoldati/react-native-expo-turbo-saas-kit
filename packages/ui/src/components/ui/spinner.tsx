@@ -9,12 +9,21 @@ export function Spinner(
     className?: string;
     width?: number;
     height?: number;
+    size?: 'small' | 'large';
   }>,
 ) {
+  const sizeMap = {
+    small: 16,
+    large: 32,
+  };
+
+  const width = props.width ?? (props.size ? sizeMap[props.size] : 24);
+  const height = props.height ?? (props.size ? sizeMap[props.size] : 24);
+
   return (
     <Svg
-      width={props.width ?? 24}
-      height={props.height ?? 24}
+      width={width}
+      height={height}
       className={cn(
         `fill-primary-foreground text-primary dark:fill-primary dark:text-primary/30 animate-spin`,
         props.className,

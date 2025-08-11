@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { HomeIcon, SettingsIcon } from 'lucide-react-native';
 
 import {
   AuthProvider,
@@ -33,13 +33,18 @@ export default function MainLayout() {
 
 function MainLayoutTabs() {
   return (
-    <Tabs initialRouteName={'index'}>
+    <Tabs 
+      initialRouteName={'index'}
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { display: 'none' }, // Hide default tab bar
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
           href: '/',
-          tabBarIcon: () => <HomeIcon className={'h-5'} />,
         }}
       />
 
@@ -48,11 +53,61 @@ function MainLayoutTabs() {
         options={{
           title: 'Settings',
           href: '/settings',
-          headerShown: false,
-          tabBarIcon: () => <SettingsIcon className={'h-5'} />,
         }}
       />
     </Tabs>
+  );
+}
+
+// Custom Tab Bar Component
+export function CustomTabBar({ onCreatePost }: { onCreatePost?: () => void }) {
+  const handleHomePress = () => {
+    router.push('/');
+  };
+
+  const handleCreatePress = () => {
+    if (onCreatePost) {
+      onCreatePost();
+    } else {
+      console.log('Create pressed');
+    }
+  };
+
+  const handleSettingsPress = () => {
+    router.push('/settings');
+  };
+
+  return (
+    <View className="h-16 bg-background border-t border-border flex-row items-center justify-around px-4">
+      {/* Home Button */}
+      <TouchableOpacity 
+        onPress={handleHomePress}
+        className="flex-1 items-center justify-center"
+      >
+        <Text className="text-lg">🏠</Text>
+        <Text className="text-xs text-muted-foreground">Home</Text>
+      </TouchableOpacity>
+
+      {/* Create Post Button */}
+      <TouchableOpacity 
+        onPress={handleCreatePress}
+        className="flex-1 items-center justify-center"
+      >
+        <View className="w-12 h-12 bg-primary rounded-full items-center justify-center">
+          <Text className="text-xl font-bold text-primary-foreground">+</Text>
+        </View>
+        <Text className="text-xs text-muted-foreground mt-1">Create</Text>
+      </TouchableOpacity>
+
+      {/* Settings Button */}
+      <TouchableOpacity 
+        onPress={handleSettingsPress}
+        className="flex-1 items-center justify-center"
+      >
+        <Text className="text-lg">⚙️</Text>
+        <Text className="text-xs text-muted-foreground">Settings</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 

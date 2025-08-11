@@ -8,7 +8,7 @@ export default function ProfileSettingsPage() {
     <View className="flex-1 p-4">
       <Stack.Screen
         options={{
-          title: 'Profile',
+          title: 'Profile ee',
           headerBackVisible: true,
           headerBackTitle: 'Settings',
           headerBackButtonMenuEnabled: true,

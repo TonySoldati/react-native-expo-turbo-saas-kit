@@ -17,7 +17,7 @@ type Page = {
 const pages: Page[] = [
   {
     name: 'application',
-    title: 'Application',
+    title: 'Application test',
     href: '/settings/application' as const,
   },
   {

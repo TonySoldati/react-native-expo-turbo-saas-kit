@@ -1,0 +1,118 @@
+# DATABASE CONTEXT - v1.2
+PostgreSQL version: 15  
+Migration tool: Supabase CLI 
+Schema last updated: 2025-01-27
+
+
+## TABLES & COLUMNS
+
+### accounts
+- id (UUID, PK)
+- name (VARCHAR(255), NOT NULL)
+- email (VARCHAR(320), UNIQUE, CHECK format)
+- picture_url (VARCHAR(1000), CHECK basic URL format if not NULL)
+- public_data (JSONB, DEFAULT '{}', NOT NULL)
+- created_at (TIMESTAMP, DEFAULT now(), NOT NULL)
+- updated_at (TIMESTAMP, DEFAULT now(), NOT NULL — updated via trigger or app logic)
+- created_by (UUID, FK → auth.users(id), ON DELETE SET NULL)
+- updated_by (UUID, FK → auth.users(id), ON DELETE SET NULL)
+
+### challenges
+- id (UUID, PK)
+- title (TEXT, NOT NULL, CHECK char_length(title) ≤ 255)
+- picture_url (TEXT, CHECK basic URL format if not NULL)
+- created_at (TIMESTAMP, DEFAULT now(), NOT NULL)
+- updated_at (TIMESTAMP, DEFAULT now(), NOT NULL — updated via trigger or app logic)
+- created_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+- updated_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+
+### accounts_challenges
+- id (UUID, PK)
+- account_id (UUID, FK → accounts.id, ON DELETE CASCADE)
+- challenge_id (UUID, FK → challenges.id, ON DELETE CASCADE)
+- created_at (TIMESTAMP, DEFAULT now(), NOT NULL)
+- updated_at (TIMESTAMP, DEFAULT now(), NOT NULL — updated via trigger or app logic)
+- created_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+- updated_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+
+### log_activites
+- id (UUID, PK)
+- account_id (UUID, FK → accounts.id, ON DELETE CASCADE)
+- title (TEXT, NOT NULL, CHECK char_length(title) ≤ 255)
+- body (TEXT)
+- image_url (TEXT, CHECK basic URL format if not NULL)
+- challenge_id (UUID, FK → challenges.id, ON DELETE CASCADE)
+- privacy (ENUM: 'public', 'team', 'private', DEFAULT 'public')
+- created_at (TIMESTAMP, DEFAULT now(), NOT NULL)
+- updated_at (TIMESTAMP, DEFAULT now(), NOT NULL — updated via trigger or app logic)
+- created_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+- updated_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+
+### comments
+- id (UUID, PK)
+- log_activite_id (UUID, FK → log_activites.id, ON DELETE CASCADE)
+- account_id (UUID, FK → accounts.id, ON DELETE CASCADE)
+- body (TEXT, NOT NULL, CHECK char_length(body) ≤ 5000)
+- created_at (TIMESTAMP, DEFAULT now(), NOT NULL)
+- updated_at (TIMESTAMP, DEFAULT now(), NOT NULL — updated via trigger or app logic)
+- created_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+- updated_by (UUID, FK → accounts.id, ON DELETE SET NULL)
+
+---
+
+## RELATIONSHIPS
+
+### Functional Relationships
+- `accounts` 1 — n `log_activites` (account creates activity logs)
+- `log_activites` 1 — n `comments` (activity logs can have comments)
+- `accounts` 1 — n `comments` (account writes comments)
+- `accounts` 1 — n `accounts_challenges` (account joins challenges)
+- `challenges` 1 — n `accounts_challenges` (challenge has participants)
+- `challenges` 1 — n `log_activites` (challenge has activity logs)
+
+### Audit Relationships (created_by/updated_by)
+- `accounts` 1 — n `accounts` (self-reference for created_by/updated_by; used for admin creation/modification, not social links)
+- `accounts` 1 — n `challenges` (account created/updated challenge)
+- `accounts` 1 — n `accounts_challenges` (account created/updated challenge participation)
+- `accounts` 1 — n `log_activites` (account created/updated activity log — separate from functional relationship)
+- `accounts` 1 — n `comments` (account created/updated comment — separate from functional relationship)
+
+---
+
+## INDEXES
+- idx_accounts_email (UNIQUE on accounts.email)
+- idx_log_activites_account_id (BTREE on log_activites.account_id)
+- idx_log_activites_challenge_id (BTREE on log_activites.challenge_id)
+- idx_comments_log_activite_id (BTREE on comments.log_activite_id)
+- idx_comments_account_id (BTREE on comments.account_id)
+- idx_accounts_challenges_account_id (BTREE on accounts_challenges.account_id)
+- idx_accounts_challenges_challenge_id (BTREE on accounts_challenges.challenge_id)
+
+---
+
+## BUSINESS RULES
+- Only the author of a log_activite can edit/delete it.
+- Privacy rules:
+  'public' → visible to all accounts
+  'team' → visible to teammates only
+  'private' → visible only to author
+- Email format must match regex: `^[^@]+@[^@]+\.[^@]+$` (CHECK constraint).
+- URL fields (picture_url, image_url) must match basic regex: ^https?:// (CHECK constraint if not NULL).
+- Max log_activite title length: 255 chars (CHECK constraint).
+- Max challenge title length: 255 chars (CHECK constraint).
+- Privacy must be 'public', 'team', or 'private' (ENUM constraint).
+- Max comment body length: 5000 chars (CHECK constraint).
+- All join tables must have a UNIQUE constraint on the pair of foreign keys to prevent duplicate entries.
+  Example: For `accounts_challenges`, `(account_id, challenge_id)` must be unique.
+  - *Don't read this, for future improvement* Only make the data visible to organizations and teams
+
+---
+
+## SECURITY NOTES *Mandatory*
+- All write operations (INSERT/UPDATE/DELETE) must be authorized based on ownership.
+- Use parameterized queries or ORM methods to prevent SQL injection.
+- Audit log for admin actions (future).
+- Overexposure risk: created_by / updated_by must not be exposed in public API responses without access control.
+- Privilege escalation risk: created_by / updated_by are set/updated server-side only — never trusted from client input.
+- With an UPDATE operation on accounts table, always check if final row is still the correct id (WITH CHECK (auth.uid() = id);)
+---
